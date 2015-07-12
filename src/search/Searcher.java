@@ -3,6 +3,7 @@ package search;
 import java.io.File;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -35,11 +36,12 @@ public class Searcher implements Runnable {
 	
 	private ExecutorService executorService;
 
-	private int emptySleepTime = 30000;
+	private int emptySleepTime = 300;
+
+	private AtomicLong fileCount = new AtomicLong(0);
 	
 	
     public Searcher(Processor processor) {
-    	System.out.println("processor");
         this.processor = processor;
     }
     
@@ -48,7 +50,6 @@ public class Searcher implements Runnable {
             addFile(file);
         }
         signalNewFile();
-        System.out.println("start file");
         return this;
     }
     
@@ -61,12 +62,10 @@ public class Searcher implements Runnable {
         if (threadNum <= 0) {
             throw new IllegalArgumentException("threadNum should be more than one!");
         }
-        System.out.println("thread");
         return this;
     }
     
     public Searcher addPipeline(Pipeline pipeline) {
-    	System.out.println("pipeline");
         this.pipeline = pipeline;
         return this;
     }
@@ -75,7 +74,7 @@ public class Searcher implements Runnable {
         if (pipeline == null) {
             pipeline = new ConsolePipeline();
         }
-//        downloader.setThread(threadNum);
+
         if (threadPool == null || threadPool.isShutdown()) {
             if (executorService != null && !executorService.isShutdown()) {
                 threadPool = new CountableThreadPool(threadNum, executorService);
@@ -85,18 +84,34 @@ public class Searcher implements Runnable {
         }
     }
     
+    
+    public void getExtraFiles(File file){
+		
+		File[] files = file.listFiles();
+		synchronized (scheduler) {
+			for (File f : files) {			
+				scheduler.push(f);
+			}
+		}
+	}
+    
+   
 	@Override
 	public void run() {
 		initComponent();
 		logger.info("Searcher started!");
 		while (!Thread.currentThread().isInterrupted()) {
+//			System.out.println("===============");
 			File file = scheduler.poll();
 			if (file == null) {
+//				System.out.println("-------  null file");
 				if (threadPool.getThreadAlive() == 0) {
 					break;
 				}
-				waitNewUrl(); // wait until new url added
+				waitNewFile(); // wait until new url added
 			} else {
+//		        logger.info("downloading page {}", file.getAbsolutePath());
+//				System.out.println("--------  not null");
 				final File fileFinal = file;//不加final会出错
 				threadPool.execute(new Runnable() {
 					@Override
@@ -105,20 +120,23 @@ public class Searcher implements Runnable {
 							processFile(fileFinal);
 						} catch (Exception e) {
 							logger.error("process file " + fileFinal + " error", e);
-						} finally {
+						} finally {                            
+							fileCount .incrementAndGet();
 							signalNewFile();
 						}
 					}
 				});
 			}
 		}
+		System.out.println("total file number: "+ fileCount.get());
+		close();
 	}
 
 	protected void processFile(File file) {
 		pipeline.process(file);
 		processor.process(file);
 	}
-
+	
 	// signal 唤醒线程
 	private void signalNewFile() {
 		try {
@@ -129,7 +147,7 @@ public class Searcher implements Runnable {
 		}
 	}
 
-	private void waitNewUrl() {
+	private void waitNewFile() {
 		newFileLock.lock();
 		try {
 			if (threadPool.getThreadAlive() == 0) {
@@ -143,4 +161,7 @@ public class Searcher implements Runnable {
 		}
 	}
 
+    public void close() {
+        threadPool.shutdown();
+    }
 }

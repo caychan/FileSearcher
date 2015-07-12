@@ -18,7 +18,7 @@ public class SearchKeyWord {
 		try {
 			String line;
 			StringBuffer sb = new StringBuffer();
-			br = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+			br = new BufferedReader(new InputStreamReader(new FileInputStream(file),"utf-8"));
 	        while ((line = br.readLine()) != null){
 	        	sb.append(line);
 	        } 
@@ -40,6 +40,7 @@ public class SearchKeyWord {
 	}
 	
 	private List<Integer> searchWord(String content, String key){
+//		System.out.println(content);
 		List<Integer> position = new ArrayList<Integer>();
 		Pattern p = Pattern.compile(key);
 		Matcher m = p.matcher(content);

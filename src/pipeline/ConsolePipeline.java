@@ -12,7 +12,8 @@ public class ConsolePipeline implements Pipeline {
 
 	@Override
 	public void process(File file) {
-        logger.info("downloading page {}", file.getAbsolutePath());
+		
+        logger.info("downloading page {}", file);
 		
 	}
 }

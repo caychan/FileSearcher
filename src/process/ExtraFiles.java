@@ -13,7 +13,6 @@ public class ExtraFiles{
 		
 		File[] files = file.listFiles();
 		synchronized (scheduler) {
-			System.out.println("add extra files");
 			for (File f : files) {			
 				scheduler.push(f);
 			}
