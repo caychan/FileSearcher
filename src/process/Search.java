@@ -15,9 +15,8 @@ public class Search implements Processor {
 	private String keyWord = "ÁÉÄþ´óÑ§";
 
 	SearchKeyWord skw = new SearchKeyWord();
+	ExtraFiles ef = new ExtraFiles();
 	List<Integer> position = new ArrayList<Integer>();
-	
-	static Searcher sch = new Searcher(new Search());
 	
 	FilePipeline fp = new FilePipeline("F:\\Clawer\\search\\record.txt");
 	
@@ -25,7 +24,7 @@ public class Search implements Processor {
 	public void process(File file) {
 
 		if (file.isDirectory()) {
-			sch.getExtraFiles(file);
+			ef.getExtraFiles(file);
 		} else if (file.isFile() && file.canRead()) {
 			position = skw.searchKeyWord(file, keyWord);
 			if (position.size() > 0) {
@@ -35,7 +34,7 @@ public class Search implements Processor {
 	}
 
 	public static void main(String[] args) {
-
+		Searcher sch = new Searcher(new Search());
 		File file = new File(FILE_PATH);
 		if (file.exists()) {
 			sch.thread(5).startFile(file)

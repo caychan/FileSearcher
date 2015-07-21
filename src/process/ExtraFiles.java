@@ -3,11 +3,12 @@ package process;
 import java.io.File;
 
 import scheduler.QueueScheduler;
+import search.Searcher;
 
 
 public class ExtraFiles{
 	
-	private QueueScheduler scheduler = new QueueScheduler();
+	QueueScheduler scheduler = Searcher.getScheduler();
 	
 	public void getExtraFiles(File file){
 		

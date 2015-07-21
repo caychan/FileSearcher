@@ -1,6 +1,8 @@
 package search;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -24,7 +26,7 @@ public class Searcher implements Runnable {
 
 	private Condition newFileCondition = newFileLock.newCondition();
 
-	private QueueScheduler scheduler = new QueueScheduler();
+	private static QueueScheduler scheduler = new QueueScheduler();
 	
 	private Pipeline pipeline;
 	
@@ -57,6 +59,10 @@ public class Searcher implements Runnable {
         scheduler.push(file);
     }
     
+    public static QueueScheduler getScheduler(){
+    	return scheduler;
+    }
+    
     public Searcher thread(int threadNum) {
         this.threadNum = threadNum;
         if (threadNum <= 0) {
@@ -83,22 +89,11 @@ public class Searcher implements Runnable {
             }
         }
     }
-    
-    
-    public void getExtraFiles(File file){
-		
-		File[] files = file.listFiles();
-		synchronized (scheduler) {
-			for (File f : files) {			
-				scheduler.push(f);
-			}
-		}
-	}
-    
    
 	@Override
 	public void run() {
 		initComponent();
+		long starTime=System.currentTimeMillis();
 		logger.info("Searcher started!");
 		while (!Thread.currentThread().isInterrupted()) {
 //			System.out.println("===============");
@@ -112,7 +107,7 @@ public class Searcher implements Runnable {
 			} else {
 //		        logger.info("downloading page {}", file.getAbsolutePath());
 //				System.out.println("--------  not null");
-				final File fileFinal = file;//不加final会出错
+				final File fileFinal = file;
 				threadPool.execute(new Runnable() {
 					@Override
 					public void run() {
@@ -129,6 +124,9 @@ public class Searcher implements Runnable {
 			}
 		}
 		System.out.println("total file number: "+ fileCount.get());
+		
+		long finishTime = System.currentTimeMillis();
+		System.out.println("total time used: " + (finishTime-starTime) + "毫秒") ;
 		close();
 	}
 
