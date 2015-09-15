@@ -10,15 +10,16 @@ import search.Searcher;
 
 public class Search implements Processor {
 
-	private static final String FILE_PATH = "F:\\Clawer\\nen - use";
+	private static final String FILE_PATH = "F:\\Clawer\\LNU_BBS_NEED\\学习交流\\329-打算考BEC，有同学来传授一下经验吗？.txt";
 
 	private String keyWord = "辽宁大学";
 
 	SearchKeyWord skw = new SearchKeyWord();
+	SearchHtmlKeyWord shkw = new SearchHtmlKeyWord();
 	ExtraFiles ef = new ExtraFiles();
 	List<Integer> position = new ArrayList<Integer>();
 	
-	FilePipeline fp = new FilePipeline("F:\\Clawer\\search\\record.txt");
+	FilePipeline fp = new FilePipeline("F:\\Clawer\\search\\bbs_record.txt");
 	
 	@Override
 	public void process(File file) {
@@ -26,7 +27,7 @@ public class Search implements Processor {
 		if (file.isDirectory()) {
 			ef.getExtraFiles(file);
 		} else if (file.isFile() && file.canRead()) {
-			position = skw.searchKeyWord(file, keyWord);
+			position = shkw.searchKeyWord(file, keyWord);
 			if (position.size() > 0) {
 				fp.process(file, position);
 			}
@@ -37,9 +38,10 @@ public class Search implements Processor {
 		Searcher sch = new Searcher(new Search());
 		File file = new File(FILE_PATH);
 		if (file.exists()) {
-			sch.thread(5).startFile(file)
-			.addPipeline(new ConsolePipeline())
-			.run();
+			sch.startFile(file)
+				.addPipeline(new ConsolePipeline())
+				.thread(5)
+				.run();
 		}
 	}
 }

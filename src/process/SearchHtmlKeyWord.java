@@ -10,14 +10,14 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class SearchKeyWord {
+public class SearchHtmlKeyWord {
 
 	
 	public List<Integer> searchKeyWord(File file, String keyWord) {
 		BufferedReader br = null;
 		List<Integer> position = new ArrayList<Integer>();
 		try {
-			String line;
+			String line = null;
 			StringBuffer sb = new StringBuffer();
 			br = new BufferedReader(new InputStreamReader(new FileInputStream(file),"utf-8"));
 	        while ((line = br.readLine()) != null){
@@ -25,6 +25,7 @@ public class SearchKeyWord {
 	        } 
 	        
 	        String str = sb.toString();
+	        str = removeTags(str);
 	        position = searchWord(str, keyWord);
 			
 		} catch (IOException e) {
@@ -48,6 +49,16 @@ public class SearchKeyWord {
 			position.add(m.start());
 		}
 		return position;
+	}
+	
+	//去掉所有的html标签
+	private String removeTags(String content){
+		System.out.println(content);
+		String regex = "<.*?>";
+		content = content.replaceAll(regex, "");
+		System.out.println("========================");
+		System.out.println(content);
+		return content;
 	}
 
 }

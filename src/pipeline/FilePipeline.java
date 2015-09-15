@@ -31,8 +31,10 @@ public class FilePipeline implements Pipeline {
 	}
 	
 	public void process(File file, List<Integer> list) {
+		
+		PrintWriter printWriter = null;
 		 try {
-			PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(
+			printWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(
 			 		getPath(),true),"gbk"));
 			
 			printWriter.println(file.getAbsolutePath());
@@ -41,9 +43,11 @@ public class FilePipeline implements Pipeline {
 				printWriter.print(integer + " ");
 			}
 			printWriter.println();
-			printWriter.close();
 		} catch (UnsupportedEncodingException | FileNotFoundException e) {
 			e.printStackTrace();
+		} finally{
+			printWriter.flush();
+			printWriter.close();
 		}
 	}
 	
