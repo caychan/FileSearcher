@@ -8,7 +8,7 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
 
-public class FilePipeline implements Pipeline {
+public class FileWordPipeline implements Pipeline {
 
 	public String path;
 
@@ -21,7 +21,7 @@ public class FilePipeline implements Pipeline {
 		}
 	}
 
-	public FilePipeline(String path) {
+	public FileWordPipeline(String path) {
 		setPath(path);
 	}
 
@@ -30,19 +30,18 @@ public class FilePipeline implements Pipeline {
 		
 	}
 	
-	public void process(File file, List<Integer> list) {
+	public void process(String path, File file, List<String> list) {
 		
 		PrintWriter printWriter = null;
 		 try {
 			printWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(
-			 		getPath(),true),"utf-8"));
+			 		getFile(path, file),true),"utf-8"));
 			System.out.println("-----------------");
 			printWriter.println(file.getAbsolutePath());
-			printWriter.print("每一个的起始位置：");
-			for (Integer integer : list) {
-				printWriter.print(integer + " ");
+
+			for (String string : list){
+				printWriter.print(string);
 			}
-			printWriter.println();
 		} catch (UnsupportedEncodingException | FileNotFoundException e) {
 			e.printStackTrace();
 		} finally{
@@ -51,6 +50,18 @@ public class FilePipeline implements Pipeline {
 		}
 	}
 	
+
+	private File getFile(String path, File file) {
+		if (! path.endsWith(pathSeperator)) {
+			path += pathSeperator;
+		}
+		File dir = new File(path);
+		if (! dir.exists()) {
+			dir.mkdirs();
+		}
+		path += file.getName();
+		return new File(path);
+	}
 
 	private void setPath(String path) {
 		this.path = path;

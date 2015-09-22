@@ -5,33 +5,40 @@ import java.util.ArrayList;
 import java.util.List;
 
 import f_pipeline.ConsolePipeline;
-import f_search.Searcher;
+import f_pipeline.FileWordPipeline;
+import f_searcher.Searcher;
 
 public class Search implements Processor {
 
-	private static final String FILE_PATH = "F:\\Clawer\\LNU_TIEBA\\2005-08";
-	private String keyWord = "ÁÉÄş´óÑ§";
+	private static final String FILE_PATH = "F:\\Clawer\\LNU_TIEBA\\2006-05\\";
+	private String keyWord = "è¾½å®å¤§å­¦";
 	
-//	±£´æ´¦ÀíµÄÎÄ¼şĞÅÏ¢µ½listÖĞ£¬¹©Ç°¶ËÊ¹ÓÃ
+	static Searcher sch = new Searcher(new Search());
+	
+	FileWordPipeline fwPipeline = new FileWordPipeline("F:\\Clawer\\LNU_TIEBA\\record");
+	//è®°å½•æŸ¥æ‰¾ç»“æœ
+	String recordPath = "F:\\Clawer\\LNU_TIEBA\\record";
+	
+//	ä¿å­˜å¤„ç†çš„æ–‡ä»¶ä¿¡æ¯åˆ°listä¸­ï¼Œä¾›å‰ç«¯ä½¿ç”¨
 	List<List<String>> lstFiles = new ArrayList<List<String>>();
 	
 	
 	public static void main(String[] args) {
-		Searcher sch = new Searcher(new Search());
 		File file = new File(FILE_PATH);
 		if (file.exists()) {
 			sch.startFile(file)
-			//ÔÚconsoleÖĞÏÔÊ¾µ±Ç°´¦ÀíµÄÎÄ¼ş
+			//åœ¨consoleä¸­æ˜¾ç¤ºå½“å‰å¤„ç†çš„æ–‡ä»¶
 			.addPipeline(new ConsolePipeline())
-			//¿ªÆô¶àÏß³ÌÍ¬²½´¦Àí
+			//å¼€å¯å¤šçº¿ç¨‹åŒæ­¥å¤„ç†
 			//.thread(5)
+			.setSleepTime(100)
 			.run();
 		}
 	}
 	
 	@Override
 	public void process(File file) {
-
+		
 		if (file.isDirectory()) {
 			ExtraFiles ef = new ExtraFiles();
 			ef.getExtraFiles(file);
@@ -41,15 +48,22 @@ public class Search implements Processor {
 			sentence = shkw.searchKeyWordReturnSentence(file, keyWord);
 			if (sentence.size() > 1) {
 				System.out.println("------" + file.getAbsolutePath());
-				addInfoToList(sentence);
+//				addInfoToList(sentence);
 				for (String str : sentence) {
 					System.out.println(str);
 				}
+				
+				fwPipeline.process(recordPath, file, sentence);
+				
 			}
 		}
 	}
-
 	
+	
+	public void stopSearch(){
+		sch.stop();
+	}
+
 	private void addInfoToList(List<String> sentence){
 		synchronized (lstFiles) {
 			lstFiles.add(sentence);

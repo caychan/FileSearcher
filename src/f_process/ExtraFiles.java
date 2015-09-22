@@ -3,7 +3,7 @@ package f_process;
 import java.io.File;
 
 import f_scheduler.QueueScheduler;
-import f_search.Searcher;
+import f_searcher.Searcher;
 
 
 public class ExtraFiles{
@@ -14,7 +14,7 @@ public class ExtraFiles{
 		
 		File[] files = file.listFiles();
 		synchronized (scheduler) {
-			for (File f : files) {			
+			for (File f : files) {
 				scheduler.push(f);
 			}
 		}

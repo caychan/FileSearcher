@@ -13,10 +13,10 @@ import java.util.regex.Pattern;
 public class SearchHtmlKeyWord {
 	
 	/**
-	 * ²éÕÒ¹Ø¼ü×Ö£¬·µ»Ø°üº¬¹Ø¼ü×ÖËùÔÚ¾ä×ÓµÄList
-	 * @param content Òª²éÕÒµÄ×Ö·û´®
-	 * @param key ¹Ø¼ü×Ö
-	 * @return ·µ»Ø°üº¬¹Ø¼ü×ÖËùÔÚ¾ä×ÓµÄList
+	 * æŸ¥æ‰¾å…³é”®å­—ï¼Œè¿”å›åŒ…å«å…³é”®å­—æ‰€åœ¨å¥å­çš„List
+	 * @param content è¦æŸ¥æ‰¾çš„å­—ç¬¦ä¸²
+	 * @param key å…³é”®å­—
+	 * @return è¿”å›åŒ…å«å…³é”®å­—æ‰€åœ¨å¥å­çš„List
 	 */
 	public List<String> searchKeyWordReturnSentence(File file, String keyWord) {
 		List<String> sentence = new ArrayList<String>();
@@ -27,10 +27,10 @@ public class SearchHtmlKeyWord {
 	}
 	
 	/**
-	 * ²éÕÒ¹Ø¼ü×ÖÎ»ÖÃ£¬·µ»Ø°üº¬Î»ÖÃµÄList
-	 * @param content Òª²éÕÒµÄ×Ö·û´®
-	 * @param key ¹Ø¼ü×Ö
-	 * @return Î»ÖÃList
+	 * æŸ¥æ‰¾å…³é”®å­—ä½ç½®ï¼Œè¿”å›åŒ…å«ä½ç½®çš„List
+	 * @param content è¦æŸ¥æ‰¾çš„å­—ç¬¦ä¸²
+	 * @param key å…³é”®å­—
+	 * @return ä½ç½®List
 	 */
 	public List<Integer> searchKeyWordReturnPosition(File file, String keyWord) {
 		List<Integer> position = new ArrayList<Integer>();
@@ -41,10 +41,10 @@ public class SearchHtmlKeyWord {
 	}
 	
 	/**
-	 * ²éÕÒ¹Ø¼ü×ÖÎ»ÖÃ
-	 * @param content Òª²éÕÒµÄ×Ö·û´®
-	 * @param key ¹Ø¼ü×Ö
-	 * @return Î»ÖÃList
+	 * æŸ¥æ‰¾å…³é”®å­—ä½ç½®
+	 * @param content è¦æŸ¥æ‰¾çš„å­—ç¬¦ä¸²
+	 * @param key å…³é”®å­—
+	 * @return ä½ç½®List
 	 */
 	private List<Integer> searchWordPosition(String content, String key){
 		List<Integer> position = new ArrayList<Integer>();
@@ -57,10 +57,10 @@ public class SearchHtmlKeyWord {
 	}
 	
 	/**
-	 * ²éÕÒ¹Ø¼ü×ÖËùÔÚµÄ¾ä×Ó
-	 * @param content	Òª²éÕÒµÄ×Ö·û´®
-	 * @param key	¹Ø¼ü×Ö
-	 * @return ¹Ø¼ü×ÖËùÔÚ¾ä×ÓµÄ¼¯ºÏ
+	 * æŸ¥æ‰¾å…³é”®å­—æ‰€åœ¨çš„å¥å­
+	 * @param content	è¦æŸ¥æ‰¾çš„å­—ç¬¦ä¸²
+	 * @param key	å…³é”®å­—
+	 * @return å…³é”®å­—æ‰€åœ¨å¥å­çš„é›†åˆ
 	 */
 	private List<String> searchWordInSentence(File file, String content, String key){
 		List<String> sentence = new ArrayList<String>();
@@ -72,29 +72,29 @@ public class SearchHtmlKeyWord {
 		sentence.add(file.getAbsolutePath());
 		while(matcher.find()){
 			position = matcher.start();
-			//×î¶à´Óµ±Ç°Î»ÖÃµÄÇ°200¸ö×Ö·ûÎ»ÖÃ¿ªÊ¼²éÕÒÉÏÒ»¸ö±êµã·ûºÅËùÔÚµÄÎ»ÖÃ
+			//æœ€å¤šä»å½“å‰ä½ç½®çš„å‰200ä¸ªå­—ç¬¦ä½ç½®å¼€å§‹æŸ¥æ‰¾ä¸Šä¸€ä¸ªæ ‡ç‚¹ç¬¦å·æ‰€åœ¨çš„ä½ç½®
 			start = position >= 200 ? position - 200 : 0;
 			end = position < length ? position + 1 : position;
 			
 			String subString = content.substring(start, end);
 			
-			//²éÕÒÖĞÓ¢ÎÄµÄ¾äºÅ£¬¸ĞÌ¾ºÅ£¬ÎÊºÅ£¬·ÖºÅ£¬Ã°ºÅ£¬ÆÆÕÛºÅºÍ¿Õ°×
-			//Pattern p = Pattern.compile("[¡££¡£¿£»£º¡ª¡ª.?:;!-\\s]");
-			Pattern p = Pattern.compile("[¡££¡£¿£»?\\s]");
+			//æŸ¥æ‰¾ä¸­è‹±æ–‡çš„å¥å·ï¼Œæ„Ÿå¹å·ï¼Œé—®å·ï¼Œåˆ†å·ï¼Œå†’å·ï¼Œç ´æŠ˜å·å’Œç©ºç™½
+			//Pattern p = Pattern.compile("[ã€‚ï¼ï¼Ÿï¼›ï¼šâ€”â€”.?:;!-\\s]");
+			Pattern p = Pattern.compile("[ã€‚ï¼ï¼Ÿï¼›?\\s]");
 			Matcher m = p.matcher(subString);
-			//³õÊ¼»¯Ò»ÏÂlastPubctuation£¬ÒòÎª¿ÉÄÜÓĞÈç¹ûÕÒ²»µ½»á·µ»Ø-1µÄÇé¿ö£¬ËùÒÔÎªÁË°²È«£¬³õÊ¼ÖµÉèÎªÁË-2
+			//åˆå§‹åŒ–ä¸€ä¸‹lastPubctuationï¼Œå› ä¸ºå¯èƒ½æœ‰å¦‚æœæ‰¾ä¸åˆ°ä¼šè¿”å›-1çš„æƒ…å†µï¼Œæ‰€ä»¥ä¸ºäº†å®‰å…¨ï¼Œåˆå§‹å€¼è®¾ä¸ºäº†-2
 			int lastPunctuation = -2;
 			while (m.find()) {
-				//¼ÇÂ¼×îºóÒ»¸öÆ¥ÅäµÄÎ»ÖÃ
+				//è®°å½•æœ€åä¸€ä¸ªåŒ¹é…çš„ä½ç½®
 				lastPunctuation = m.start();
 			}
 			if (lastPunctuation >= 0) {
-				//Èç¹ûÕÒµ½ÁË£¬´ËÊ±µÄlastPunctuationÊÇsubStringÖĞµÄÎ»ÖÃ£¬¸Ä³ÉcontentÖĞµÄÎ»ÖÃ¡£
-				//+1ÊÇÒòÎªËü´ËÊ±Ö¸ÏòµÄÊÇ±êµã·ûºÅ
+				//å¦‚æœæ‰¾åˆ°äº†ï¼Œæ­¤æ—¶çš„lastPunctuationæ˜¯subStringä¸­çš„ä½ç½®ï¼Œæ”¹æˆcontentä¸­çš„ä½ç½®ã€‚
+				//+1æ˜¯å› ä¸ºå®ƒæ­¤æ—¶æŒ‡å‘çš„æ˜¯æ ‡ç‚¹ç¬¦å·
 				lastPunctuation = position - (subString.length() - lastPunctuation) + 1;
 			}
 			if (lastPunctuation < 0 ) {
-				//Èç¹ûÃ»ÓĞÕÒµ½·ûºÏÒªÇóµÄÎ»ÖÃ£¬¾ÍÉèÎªµ±Ç°Î»ÖÃµÄÇ°100¸ö»òÕß0
+				//å¦‚æœæ²¡æœ‰æ‰¾åˆ°ç¬¦åˆè¦æ±‚çš„ä½ç½®ï¼Œå°±è®¾ä¸ºå½“å‰ä½ç½®çš„å‰100ä¸ªæˆ–è€…0
 				lastPunctuation = position >= 100 ? position - 100 : 0;
 			}
 
@@ -108,8 +108,8 @@ public class SearchHtmlKeyWord {
 				nextPunctuation = nextPunctuation + position;
 			}
 			if (nextPunctuation < 0 ) {
-				//Èç¹ûÃ»ÓĞÕÒµ½·ûºÏÒªÇóµÄÎ»ÖÃ£¬¾ÍÉèÎªµ±Ç°Î»ÖÃµÄºó100¸ö»òÕßµ½½áÎ²
-				//-1ÊÇÒòÎªString.substringµÄµÚ¶ş¸ö²ÎÊıÈç¹û¸úlengthÒ»Ñù´ó£¬»áÖ¸±êÔ½½ç
+				//å¦‚æœæ²¡æœ‰æ‰¾åˆ°ç¬¦åˆè¦æ±‚çš„ä½ç½®ï¼Œå°±è®¾ä¸ºå½“å‰ä½ç½®çš„å100ä¸ªæˆ–è€…åˆ°ç»“å°¾
+				//-1æ˜¯å› ä¸ºString.substringçš„ç¬¬äºŒä¸ªå‚æ•°å¦‚æœè·Ÿlengthä¸€æ ·å¤§ï¼Œä¼šæŒ‡æ ‡è¶Šç•Œ
 				nextPunctuation = (length - position) > 100 ? position + 100 : length - 1;
 			}
 
@@ -120,11 +120,11 @@ public class SearchHtmlKeyWord {
 	
 	
 	
-	//È¥µôËùÓĞµÄhtml±êÇ©
+	//å»æ‰æ‰€æœ‰çš„htmlæ ‡ç­¾
 	private String removeTags(String content){
 		String regex = "<.*?>";
 		content = content.replaceAll(regex, "");
-//		°ÑÁ¬Ğø³öÏÖµÄÁ½¸öÒÔÉÏµÄ¿Õ°×È¥µô
+//		æŠŠè¿ç»­å‡ºç°çš„ä¸¤ä¸ªä»¥ä¸Šçš„ç©ºç™½å»æ‰
 		regex = "\\s{2,}";
 		content = content.replaceAll(regex, " ");
 		
