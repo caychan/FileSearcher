@@ -1,9 +1,9 @@
-package process;
+package f_process;
 
 import java.io.File;
 
-import scheduler.QueueScheduler;
-import search.Searcher;
+import f_scheduler.QueueScheduler;
+import f_search.Searcher;
 
 
 public class ExtraFiles{

@@ -1,4 +1,4 @@
-package pipeline;
+package f_pipeline;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -35,8 +35,8 @@ public class FilePipeline implements Pipeline {
 		PrintWriter printWriter = null;
 		 try {
 			printWriter = new PrintWriter(new OutputStreamWriter(new FileOutputStream(
-			 		getPath(),true),"gbk"));
-			
+			 		getPath(),true),"utf-8"));
+			System.out.println("-----------------");
 			printWriter.println(file.getAbsolutePath());
 			printWriter.print("每一个的起始位置：");
 			for (Integer integer : list) {

@@ -1,6 +1,8 @@
-package search;
+package f_search;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -10,15 +12,17 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import pipeline.ConsolePipeline;
-import pipeline.Pipeline;
-import process.Processor;
-import scheduler.QueueScheduler;
-import thread.CountableThreadPool;
+import f_pipeline.ConsolePipeline;
+import f_pipeline.Pipeline;
+import f_process.Processor;
+import f_scheduler.QueueScheduler;
+import f_thread.CountableThreadPool;
 
 public class Searcher implements Runnable {
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
+	
+    protected List<Pipeline> pipelines = new ArrayList<Pipeline>();
 
 	private ReentrantLock newFileLock = new ReentrantLock();
 
@@ -70,15 +74,16 @@ public class Searcher implements Runnable {
     }
     
     public Searcher addPipeline(Pipeline pipeline) {
-        this.pipeline = pipeline;
+        this.pipelines.add(pipeline);
         return this;
     }
 
     protected void initComponent() {
-        if (pipeline == null) {
-            pipeline = new ConsolePipeline();
-        }
 
+    	if (pipelines.isEmpty()) {
+			pipelines.add(new ConsolePipeline());
+		}
+    	
         if (threadPool == null || threadPool.isShutdown()) {
             if (executorService != null && !executorService.isShutdown()) {
                 threadPool = new CountableThreadPool(threadNum, executorService);
@@ -129,7 +134,9 @@ public class Searcher implements Runnable {
 	}
 
 	protected void processFile(File file) {
-		pipeline.process(file);
+       for (Pipeline pipeline : pipelines) {
+           pipeline.process(file);
+       }
 		processor.process(file);
 	}
 	
