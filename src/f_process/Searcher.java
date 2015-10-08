@@ -1,4 +1,4 @@
-package f_search;
+package f_process;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -14,8 +14,8 @@ import org.slf4j.LoggerFactory;
 
 import f_pipeline.ConsolePipeline;
 import f_pipeline.Pipeline;
-import f_process.Processor;
 import f_scheduler.QueueScheduler;
+import f_scheduler.Scheduler;
 import f_thread.CountableThreadPool;
 
 public class Searcher implements Runnable {
@@ -28,9 +28,9 @@ public class Searcher implements Runnable {
 
 	private Condition newFileCondition = newFileLock.newCondition();
 
-	private static QueueScheduler scheduler = new QueueScheduler();
+	private Scheduler scheduler = new QueueScheduler();
 	
-	private Pipeline pipeline;
+	private static boolean stop = false;
 	
 	private Processor processor;
 	
@@ -44,6 +44,10 @@ public class Searcher implements Runnable {
 
 	private AtomicLong fileCount = new AtomicLong(0);
 	
+	private int sleepTime = 0;
+	
+	private long starTime = 0;
+	
 	
     public Searcher(Processor processor) {
         this.processor = processor;
@@ -53,7 +57,6 @@ public class Searcher implements Runnable {
         for (File file : files) {
             addFile(file);
         }
-        signalNewFile();
         return this;
     }
     
@@ -61,8 +64,21 @@ public class Searcher implements Runnable {
         scheduler.push(file);
     }
     
-    public static QueueScheduler getScheduler(){
-    	return scheduler;
+    public Searcher setScheduler(Scheduler scheduler) {
+        //如果自己定义了Scheduler，则把默认的Scheduler的file导入新的里面
+        Scheduler oldScheduler = this.scheduler;
+        this.scheduler = scheduler;
+        if (oldScheduler != null) {
+            File file;
+            while ((file = oldScheduler.poll()) != null) {
+                this.scheduler.push(file);
+            }
+        }
+        return this;
+    }
+    
+    public Scheduler getScheduler(){
+    	return this.scheduler;
     }
     
     public Searcher thread(int threadNum) {
@@ -73,17 +89,33 @@ public class Searcher implements Runnable {
         return this;
     }
     
+    private void sleep(int time) {
+        try {
+            Thread.sleep(time);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+    
     public Searcher addPipeline(Pipeline pipeline) {
         this.pipelines.add(pipeline);
         return this;
     }
 
     protected void initComponent() {
+    	if (stop) {
+			stop = false;
+		}
 
     	if (pipelines.isEmpty()) {
 			pipelines.add(new ConsolePipeline());
 		}
     	
+    	if (scheduler == null) {
+    		System.out.println("init component");
+			scheduler = new QueueScheduler();
+		}
+
         if (threadPool == null || threadPool.isShutdown()) {
             if (executorService != null && !executorService.isShutdown()) {
                 threadPool = new CountableThreadPool(threadNum, executorService);
@@ -93,29 +125,33 @@ public class Searcher implements Runnable {
         }
     }
    
+    public void stop(){
+    	stop = true;
+    }
+    public void start(){
+    	fileCount.set(0);
+    	stop = false;
+    }
+    
 	@Override
 	public void run() {
 		initComponent();
-		long starTime=System.currentTimeMillis();
+		starTime=System.currentTimeMillis();
 		logger.info("Searcher started!");
-		while (!Thread.currentThread().isInterrupted()) {
-//			System.out.println("===============");
+		while (!Thread.currentThread().isInterrupted() && !stop) {
 			File file = scheduler.poll();
 			if (file == null) {
-//				System.out.println("-------  null file");
 				if (threadPool.getThreadAlive() == 0) {
 					break;
 				}
 				waitNewFile(); // wait until new url added
 			} else {
-//		        logger.info("downloading page {}", file.getAbsolutePath());
-//				System.out.println("--------  not null");
 				final File fileFinal = file;
 				threadPool.execute(new Runnable() {
 					@Override
 					public void run() {
 						try {
-							processFile(fileFinal);
+							processFile(fileFinal);		
 						} catch (Exception e) {
 							logger.error("process file " + fileFinal + " error", e);
 						} finally {                            
@@ -124,23 +160,32 @@ public class Searcher implements Runnable {
 						}
 					}
 				});
+//				System.out.println("while run end");
 			}
 		}
-		System.out.println("total file number: "+ fileCount.get());
-		
-		long finishTime = System.currentTimeMillis();
-		System.out.println("total time used: " + (finishTime-starTime) + "����") ;
 		close();
 	}
 
 	protected void processFile(File file) {
-       for (Pipeline pipeline : pipelines) {
-           pipeline.process(file);
+       for (int i = 0; i < pipelines.size(); i ++) {
+           pipelines.get(i).process(file);
        }
 		processor.process(file);
+		
+		if (getSleepTime() > 0) {
+			sleep(getSleepTime());
+		}
 	}
 	
-	// signal �����߳�
+	public Searcher setSleepTime(int sleepTime){
+		this.sleepTime = sleepTime;
+		return this;
+	}
+	private int getSleepTime(){	
+		return this.sleepTime;
+	}
+	
+	// signal 唤醒线程
 	private void signalNewFile() {
 		try {
 			newFileLock.lock();
@@ -164,7 +209,25 @@ public class Searcher implements Runnable {
 		}
 	}
 
-    public void close() {
-        threadPool.shutdown();
-    }
+	private boolean close() {
+		if (threadPool.shutdown()) {
+			pipelines.clear();
+			this.scheduler.clear();
+		
+			System.out.println("total file number: "+ fileCount.get());
+			long finishTime = System.currentTimeMillis();
+			System.out.println("total time used: " + (finishTime-starTime) + "毫秒") ;
+			return true;
+		}
+		return false;
+	}
+	
+	public void getExtraFiles(File file){
+		File[] files = file.listFiles();
+		synchronized (scheduler) {
+			for (File f : files) {
+				scheduler.push(f);
+			}
+		}
+	}
 }
